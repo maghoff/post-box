@@ -1,0 +1,11 @@
+[package]
+authors = ["Magnus Hoff <maghoff@gmail.com>"]
+name = "post-box"
+version = "0.1.0"
+
+[dependencies]
+base64 = "0.2.1"
+getopts = "0.2.14"
+rotor = "0.6.3"
+rotor-http = "0.7.0"
+rust-crypto = "0.2.36"
