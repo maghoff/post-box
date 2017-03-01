@@ -153,25 +153,28 @@ fn main() {
     opts.optopt("", "url", "Use URL as base URL for generated URLs", "URL");
     let matches = opts.parse(args).unwrap();
 
-    let event_loop = rotor::Loop::new(&rotor::Config::new()).unwrap();
-
-    let mut loop_inst = event_loop.instantiate(Context {
+    let context = Context {
         file_root: PathBuf::from(&matches.opt_str("root").unwrap_or("".to_owned())),
         key: base64::decode(&matches.opt_str("key").expect("You must specify HMAC key with --key")).expect("KEY must be correctly base64 encoded"),
         root_url: matches.opt_str("url").expect("You must specify root url with --url"),
-    });
+    };
+
+    // Lots of duplication here, due to my inability to refactor without
+    // introducing type errors. Maybe the telnet-example holds the key:
+    // https://github.com/tailhook/rotor/blob/master/examples/telnet.rs
 
     if let Some(unix) = matches.opt_str("unix") {
-        let _lst = UnixListener::bind(&unix).unwrap();
+        let mut event_loop = rotor::Loop::new(&rotor::Config::new()).unwrap();
+        let lst = UnixListener::bind(&unix).unwrap();
         println!("Listening to {}", &unix);
-//        loop_inst.add_machine_with(|scope| Fsm::<PostBox, _>::new(lst, (), scope)).unwrap();
-        panic!("Somehow it will not compile with the option to do either Unix or TCP");
+        event_loop.add_machine_with(|scope| Fsm::<PostBox, _>::new(lst, (), scope)).unwrap();
+        event_loop.run(context).unwrap();
     } else {
+        let mut event_loop = rotor::Loop::new(&rotor::Config::new()).unwrap();
         let addr = matches.opt_str("tcp").unwrap_or("127.0.0.1:2000".to_owned());
         let lst = TcpListener::bind(&addr.parse().unwrap()).unwrap();
         println!("Listening to {}", &lst.local_addr().unwrap());
-        loop_inst.add_machine_with(|scope| Fsm::<PostBox, _>::new(lst, (), scope)).unwrap();
+        event_loop.add_machine_with(|scope| Fsm::<PostBox, _>::new(lst, (), scope)).unwrap();
+        event_loop.run(context).unwrap();
     }
-
-    loop_inst.run().unwrap();
 }
