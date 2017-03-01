@@ -76,8 +76,6 @@ impl Server for PostBox {
                 let dirname = scope.file_root.join(scramble);
                 assert!(dirname.starts_with(&scope.file_root));
 
-                println!("{:?}: {:?}", &dirname.join(&name), &data);
-
                 use std::fs::*;
                 use std::io::Write;
                 create_dir(&dirname).unwrap();
