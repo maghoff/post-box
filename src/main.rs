@@ -153,7 +153,9 @@ fn main() {
 
     let context = Context {
         file_root: PathBuf::from(&matches.opt_str("root").unwrap_or("".to_owned())),
-        key: base64::decode(&matches.opt_str("key").expect("You must specify HMAC key with --key")).expect("KEY must be correctly base64 encoded"),
+        key: base64::decode(
+                &matches.opt_str("key").expect("You must specify HMAC key with --key")
+            ).expect("KEY must be correctly base64 encoded"),
         root_url: matches.opt_str("url").expect("You must specify root url with --url"),
     };
 
